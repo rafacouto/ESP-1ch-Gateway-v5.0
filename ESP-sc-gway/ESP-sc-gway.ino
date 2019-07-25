@@ -339,7 +339,7 @@ void ftoa(float f, char *val, int p) {
 	strcat(val,".");							// Copy decimal point
 	
 	itoa(fval,b,10);							// Copy fraction part base 10
-	for (int i=0; i<(p-strlen(b)); i++) {
+	for (int i=0; i<(p-(int)strlen(b)); i++) {
 		strcat(val,"0"); 						// first number of 0 of faction?
 	}
 	
@@ -472,7 +472,6 @@ void setupTime() {
 // ----------------------------------------------------------------------------
 int readUdp(int packetSize)
 {
-	uint8_t protocol;
 	uint16_t token;
 	uint8_t ident; 
 	uint8_t buff[32]; 						// General buffer to use for UDP, set to 64
@@ -530,7 +529,6 @@ int readUdp(int packetSize)
 	// If it is not NTP it must be a LoRa message for gateway or node
 	else {
 		uint8_t *data = (uint8_t *) ((uint8_t *)buff_down + 4);
-		protocol = buff_down[0];
 		token = buff_down[2]*256 + buff_down[1];
 		ident = buff_down[3];
 

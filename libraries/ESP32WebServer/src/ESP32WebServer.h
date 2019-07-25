@@ -25,7 +25,12 @@
 #define ESP32WEBSERVER_H
 
 #include <functional>
-#include <WiFi.h>
+
+#ifdef ESP8266
+#   include <ESP8266WiFi.h>
+#else
+#   include <WiFi.h>
+#endif
 
 enum HTTPMethod { HTTP_ANY, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_DELETE, HTTP_OPTIONS };
 enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END,

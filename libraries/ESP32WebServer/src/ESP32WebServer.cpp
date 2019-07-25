@@ -228,7 +228,9 @@ void ESP32WebServer::handleClient() {
 }
 
 void ESP32WebServer::close() {
+#ifndef ESP8266
   _server.end();
+#endif
 }
 
 void ESP32WebServer::stop() {

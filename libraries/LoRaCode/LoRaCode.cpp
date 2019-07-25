@@ -11,18 +11,18 @@
 //
 // Author: Maarten Westenberg
 //
-// The protocols used in this code: 
+// The protocols used in this code:
 // 1. LoRA Specification version V1.0 and V1.1 for Gateway-Node communication
-//	
+//
 // 2. Semtech Basic communication protocol between Lora gateway and server version 3.0.0
 //	https://github.com/Lora-net/packet_forwarder/blob/master/PROTOCOL.TXT
 //
-// Notes: 
+// Notes:
 // The lCode specification is documented on a sparate page on github.
 //
 // Todo:
 // The luminescense is read as a 16-bit value in the library and converted to
-//	a float value in order to get proper scaling etc. In the lCode lib it is 
+//	a float value in order to get proper scaling etc. In the lCode lib it is
 //	coded as a 2-byte value over the air, which might be incorrect for lux values
 //	over 650 lux (which IS posible since bright daylight has more than 1000 lux).
 //	So XXX we have to add another byte to cover values above 65
@@ -35,7 +35,7 @@
 #include <Arduino.h>
 #include <Battery.h>
 #elif defined(ARDUINO_ARCH_ESP8266) | defined(ESP32)
-#include <ESP.h>
+#include <Arduino.h>
 #elif defined(__MKL26Z64__)
 #include <Arduino.h>
 #else
@@ -47,7 +47,7 @@
 int ldebug=DEBUG;
 
 // --------------------------------------------------------------------------------
-// Encode Temperature. 
+// Encode Temperature.
 // We use 2 bytes for temperature, first contains the integer partial_sort.
 // We add 100 so we effectively will measure temperatures between -100 and 154 degrees.
 // Second byte contains the fractional part in 2 decimals (00-99).
@@ -78,7 +78,7 @@ int LoRaCode::eTemperature(float val, byte *msg) {
 int LoRaCode::eHumidity(float val, byte *msg) {
 	int len=0;
 	byte i = (byte) ((float)val *2);				// Value times 2
-	msg[len++] = ((byte)O_HUMI << 2) | 0x00;	// Last 2 bits are 0x00, one byte 
+	msg[len++] = ((byte)O_HUMI << 2) | 0x00;	// Last 2 bits are 0x00, one byte
 	msg[len++] = i;								//
 #if DEBUG>0
 	if (ldebug >=1) {
@@ -97,7 +97,7 @@ int LoRaCode::eHumidity(float val, byte *msg) {
 int LoRaCode::eAirpressure(float val, byte *msg) {
 	int len=0;
 	byte i = (byte) ((float)val -850);			// Value times 2
-	msg[len++] = ((byte)O_AIRP << 2) | 0x00;	// Last 2 bits are 0x00, one byte 
+	msg[len++] = ((byte)O_AIRP << 2) | 0x00;	// Last 2 bits are 0x00, one byte
 	msg[len++] = i;								//
 #if DEBUG>0
 	if (ldebug >=1) {
@@ -176,10 +176,10 @@ int LoRaCode::eGpsL(double lat, double lng, long alt, int sat,
 // Encode the 1-bit PIR value
 // --------------------------------------------------------------------------------
 int LoRaCode::ePir(int val, byte *msg) {
-	int i = (byte) ( val );	
+	int i = (byte) ( val );
 	int len=0;										//
-	msg[len++] = (O_PIR << 2) | 0x00;				// Last 2 bits are 0x00, one byte 
-	msg[len++] = i;	
+	msg[len++] = (O_PIR << 2) | 0x00;				// Last 2 bits are 0x00, one byte
+	msg[len++] = i;
 	return(len);
 }
 
@@ -196,7 +196,7 @@ int LoRaCode::eAirquality(int pm25, int pm10, byte *msg) {
 	msg[len++] = (O_AQ << 2) | 0x03;				// Last 2 bits are 0x03, so 4 bytes data
 	msg[len++] = (val >> 8) & 0xFF;
 	msg[len++] = val & 0xFF;
-	
+
 	val = (uint16_t) (pm10);
 	msg[len++] = (val >> 8) & 0xFF;
 	msg[len++] = val & 0xFF;
@@ -214,30 +214,30 @@ int LoRaCode::eAirquality(int pm25, int pm10, byte *msg) {
 
 // --------------------------------------------------------------------------------
 // Encode a Multi-Button sensor. This sensor is a concentrator that receives
-// several sensor values over 433MHz and retransmits them over LoRa 
+// several sensor values over 433MHz and retransmits them over LoRa
 //	The LoRa sensor node contains the main address (LoRa id), the concentrated
 // sendors have their own unique address/channel combination.
 // --------------------------------------------------------------------------------
 int	LoRaCode::eMbuttons(byte val, unsigned long address, unsigned short channel, byte *msg) {
 	int len=0;
 	msg[len++] = (O_MB << 2) | 0x00;			// Several bytes, do not care
-	
+
 	msg[len++] = val;							// First code the value
-		
+
 	msg[len++] = (address >> (8*3)) & 0xFF;		// Address
 	msg[len++] = (address >> (8*2)) & 0xFF;
 	msg[len++] = (address >> (8*1)) & 0xFF;
 	msg[len++] = (address >> (8*0)) & 0xFF;
-	
+
 	msg[len++] = (channel >> (8*1)) & 0xFF;		// Channel
 	msg[len++] = (channel >> (8*0)) & 0xFF;
-	
+
 #if DEBUG>0
 	if (ldebug >=1) {
 		Serial.print(F("lcode:: Add Multi-Button "));
 		Serial.println(val);						// For readibility
 	}
-#endif	
+#endif
 	return(len);
 }
 
@@ -302,7 +302,7 @@ int LoRaCode::eLuminescenseL(float val, byte *msg) {
 }
 
 // --------------------------------------------------------------------------------
-// Distance detection 
+// Distance detection
 // In this case we use 2 bytes for 0-65535 mm (which is more than we need)
 // NOTE: The sensor will report in mm resolution, but the server side
 // will decode in cm resolution with one decimal fraction (if available)
@@ -351,7 +351,7 @@ int LoRaCode::eGas(int val, byte *msg) {
 int LoRaCode::eBattery(float val, byte *msg) {
 	int len=0;
 	int i = (byte) ((float)val *20);				// Value times 20
-	msg[len++] = (O_BATT << 2) | 0x00;				// Last 2 bits are 0x00, one byte 
+	msg[len++] = (O_BATT << 2) | 0x00;				// Last 2 bits are 0x00, one byte
 	msg[len++] = i;
 #if DEBUG>0
 	if (ldebug >=1) {
@@ -411,12 +411,12 @@ int LoRaCode::eVal (int opcode, byte *val, byte *msg) {
 			len += eHumidity((float) *val, msg);
 		break;
 		case O_AIRP:								// Airpressure
-			len += eAirpressure((float) *val, msg);	
+			len += eAirpressure((float) *val, msg);
 		break;
 		case O_GPS:									// GPS short Info
 			//len += eGps(lat, lng, msg);
 		break;
-		case O_PIR:									// PIR 
+		case O_PIR:									// PIR
 			len += ePir((int) *val, msg);
 		break;
 
@@ -456,13 +456,13 @@ bool LoRaCode::eMsg (byte * msg, int len) {
 #endif
 	// else we probably have a good message
 	msg[0] = ( len << 1 ) | (0x80);
-	
+
 	// Now we have to calculate the Parity for the message
 	for (int i=0; i< len; i++) {
 	  byte cc = msg[i];
 	  par ^= cc;
 	}
-	
+
 	// Now we have par as one byte and need to XOR the bits of that byte.
 	unsigned char pp = 8;							// width of byte in #bits
 	while (pp > 1) {
